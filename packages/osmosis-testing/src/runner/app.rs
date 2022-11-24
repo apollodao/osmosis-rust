@@ -68,6 +68,7 @@ impl OsmosisTestApp {
         })?;
 
         Ok(SigningAccount::new(
+            "osmo".to_string(),
             signging_key,
             FeeSetting::Auto {
                 gas_price: Coin::new(0, FEE_DENOM.to_string()),

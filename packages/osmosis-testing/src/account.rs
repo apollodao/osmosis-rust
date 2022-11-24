@@ -4,27 +4,23 @@ use cosmrs::{
 };
 use cosmwasm_std::Coin;
 
-const ADDRESS_PREFIX: &str = "osmo";
+const OSMO_ADDRESS_PREFIX: &str = "osmo";
 
 pub trait Account {
     fn public_key(&self) -> PublicKey;
-    fn address(&self) -> String {
-        self.account_id().to_string()
-    }
-    fn account_id(&self) -> AccountId {
-        self.public_key()
-            .account_id(ADDRESS_PREFIX)
-            .expect("ADDRESS_PREFIX is constant and must valid")
-    }
+    fn address(&self) -> String;
+    fn account_id(&self) -> AccountId;
 }
 pub struct SigningAccount {
+    prefix: String,
     signing_key: SigningKey,
     fee_setting: FeeSetting,
 }
 
 impl SigningAccount {
-    pub fn new(signing_key: SigningKey, fee_setting: FeeSetting) -> Self {
+    pub fn new(prefix: String, signing_key: SigningKey, fee_setting: FeeSetting) -> Self {
         SigningAccount {
+            prefix,
             signing_key,
             fee_setting,
         }
@@ -36,6 +32,7 @@ impl SigningAccount {
 
     pub fn with_fee_setting(self, fee_setting: FeeSetting) -> Self {
         Self {
+            prefix: self.prefix,
             signing_key: self.signing_key,
             fee_setting,
         }
@@ -45,6 +42,15 @@ impl SigningAccount {
 impl Account for SigningAccount {
     fn public_key(&self) -> PublicKey {
         self.signing_key.public_key()
+    }
+
+    fn address(&self) -> String {
+        self.account_id().to_string()
+    }
+    fn account_id(&self) -> AccountId {
+        self.public_key()
+            .account_id(&self.prefix)
+            .expect("prefix is constant and must valid")
     }
 }
 
@@ -75,6 +81,15 @@ impl From<SigningAccount> for NonSigningAccount {
 impl Account for NonSigningAccount {
     fn public_key(&self) -> PublicKey {
         self.public_key
+    }
+
+    fn address(&self) -> String {
+        self.account_id().to_string()
+    }
+    fn account_id(&self) -> AccountId {
+        self.public_key()
+            .account_id(OSMO_ADDRESS_PREFIX)
+            .expect("ADDRESS_PREFIX is constant and must valid")
     }
 }
 
