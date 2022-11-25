@@ -1,10 +1,16 @@
 use std::ffi::CString;
 
 use cosmrs::crypto::secp256k1::SigningKey;
+use cosmrs::proto::cosmwasm::wasm::v1::{
+    QuerySmartContractStateRequest, QuerySmartContractStateResponse,
+};
 use cosmrs::proto::tendermint::abci::{RequestDeliverTx, ResponseDeliverTx};
 use cosmrs::tx;
 use cosmrs::tx::{Fee, SignerInfo};
-use cosmwasm_std::Coin;
+use cosmwasm_std::{
+    from_binary, Binary, Coin, ContractResult, Empty, QuerierResult, QueryRequest, StdError,
+    SystemResult, WasmQuery,
+};
 use prost::Message;
 
 use crate::account::{Account, FeeSetting, SigningAccount};
@@ -180,6 +186,30 @@ impl OsmosisTestApp {
                 panic!("estimate fee is a private function and should never be called when fee_setting is Custom");
             }
         }
+    }
+}
+
+impl cosmwasm_std::Querier for OsmosisTestApp {
+    fn raw_query(&self, bin_request: &[u8]) -> QuerierResult {
+        let x = match from_binary::<QueryRequest<Empty>>(&bin_request.into()).unwrap() {
+            QueryRequest::Wasm(wasm_query) => match wasm_query {
+                WasmQuery::Smart { contract_addr, msg } => self
+                    .query::<_, QuerySmartContractStateResponse>(
+                        "/cosmwasm.wasm.v1.Query/SmartContractState",
+                        &QuerySmartContractStateRequest {
+                            address: contract_addr.to_owned(),
+                            query_data: msg.into(),
+                        },
+                    )
+                    .unwrap()
+                    .data
+                    .into(),
+                _ => todo!("unsupported WasmQuery variant"),
+            },
+            _ => todo!("unsupported QueryRequest variant"),
+        };
+
+        SystemResult::Ok(ContractResult::Ok(x))
     }
 }
 
