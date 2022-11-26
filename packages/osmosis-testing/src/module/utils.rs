@@ -6,6 +6,7 @@ use cosmrs::proto::{
     },
 };
 use cosmwasm_std::{BankMsg, Coin, StdResult, WasmMsg};
+use itertools::Itertools;
 use prost::Message;
 
 use crate::{Account, EncodeError, RunnerError, SigningAccount};
@@ -13,6 +14,7 @@ use crate::{Account, EncodeError, RunnerError, SigningAccount};
 pub fn coins_to_proto(coins: &[Coin]) -> Vec<cosmrs::proto::cosmos::base::v1beta1::Coin> {
     coins
         .iter()
+        .sorted_by(|a, b| a.denom.cmp(&b.denom))
         .map(|c| cosmrs::proto::cosmos::base::v1beta1::Coin {
             denom: c.denom.parse().unwrap(),
             amount: format!("{}", c.amount.u128()),
