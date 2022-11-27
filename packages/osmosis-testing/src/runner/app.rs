@@ -8,8 +8,7 @@ use cosmrs::proto::tendermint::abci::{RequestDeliverTx, ResponseDeliverTx};
 use cosmrs::tx;
 use cosmrs::tx::{Fee, SignerInfo};
 use cosmwasm_std::{
-    from_binary, Binary, Coin, ContractResult, Empty, QuerierResult, QueryRequest, StdError,
-    SystemResult, WasmQuery,
+    from_binary, Coin, ContractResult, Empty, QuerierResult, QueryRequest, SystemResult, WasmQuery,
 };
 use prost::Message;
 
