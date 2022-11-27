@@ -1,6 +1,9 @@
 use std::ffi::CString;
 
 use cosmrs::crypto::secp256k1::SigningKey;
+use cosmrs::proto::cosmos::bank::v1beta1::{
+    QueryBalanceRequest, QueryBalanceResponse, QuerySupplyOfRequest, QuerySupplyOfResponse,
+};
 use cosmrs::proto::cosmwasm::wasm::v1::{
     QuerySmartContractStateRequest, QuerySmartContractStateResponse,
 };
@@ -8,9 +11,11 @@ use cosmrs::proto::tendermint::abci::{RequestDeliverTx, ResponseDeliverTx};
 use cosmrs::tx;
 use cosmrs::tx::{Fee, SignerInfo};
 use cosmwasm_std::{
-    from_binary, Coin, ContractResult, Empty, QuerierResult, QueryRequest, SystemResult, WasmQuery,
+    from_binary, to_binary, BalanceResponse, BankQuery, Coin, ContractResult, Empty, QuerierResult,
+    QueryRequest, SystemResult, WasmQuery,
 };
 use prost::Message;
+use serde::{Deserialize, Serialize};
 
 use crate::account::{Account, FeeSetting, SigningAccount};
 use crate::bindings::{
@@ -22,6 +27,7 @@ use crate::runner::error::{DecodeError, EncodeError, RunnerError};
 use crate::runner::result::RawResult;
 use crate::runner::result::{RunnerExecuteResult, RunnerResult};
 use crate::runner::Runner;
+use crate::utils::proto_coin_to_coin;
 
 const FEE_DENOM: &str = "uosmo";
 const CHAIN_ID: &str = "osmosis-1";
@@ -205,6 +211,50 @@ impl cosmwasm_std::Querier for OsmosisTestApp {
                     .into(),
                 _ => todo!("unsupported WasmQuery variant"),
             },
+            QueryRequest::Bank(bank_query) => match bank_query {
+                BankQuery::Balance { address, denom } => {
+                    let balance = self
+                        .query::<_, QueryBalanceResponse>(
+                            "/cosmos.bank.v1beta1.Query/Balance",
+                            &QueryBalanceRequest {
+                                address: address.to_owned(),
+                                denom: denom.to_owned(),
+                            },
+                        )
+                        .unwrap()
+                        .balance
+                        .unwrap();
+                    to_binary(&BalanceResponse {
+                        amount: proto_coin_to_coin(&balance),
+                    })
+                    .unwrap()
+                }
+                BankQuery::Supply { denom } => {
+                    let supply = self
+                        .query::<_, QuerySupplyOfResponse>(
+                            "/cosmos.bank.v1beta1.Query/SupplyOf",
+                            &QuerySupplyOfRequest {
+                                denom: denom.to_owned(),
+                            },
+                        )
+                        .unwrap()
+                        .amount
+                        .unwrap();
+
+                    // We must copy this struct because the original is non-exhaustive
+                    #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+                    #[serde(rename_all = "snake_case")]
+                    pub struct SupplyResponse {
+                        pub amount: Coin,
+                    }
+                    to_binary(&SupplyResponse {
+                        amount: proto_coin_to_coin(&supply),
+                    })
+                    .unwrap()
+                }
+                _ => todo!("unsupported BankQuery variant"),
+            },
+            QueryRequest::Stargate { path, data } => self.query_raw(&path, data.0).unwrap().into(),
             _ => todo!("unsupported QueryRequest variant"),
         };
 
@@ -280,6 +330,18 @@ impl<'a> Runner<'a> for OsmosisTestApp {
         res
     }
 
+    fn query_raw(&self, path: &str, protobuf: Vec<u8>) -> RunnerResult<Vec<u8>> {
+        let base64_query_msg_bytes = base64::encode(protobuf);
+        redefine_as_go_string!(path);
+        redefine_as_go_string!(base64_query_msg_bytes);
+
+        unsafe {
+            let res = Query(self.id, path, base64_query_msg_bytes);
+            let res = RawResult::from_non_null_ptr(res).into_result()?;
+            Ok(res)
+        }
+    }
+
     fn query<Q, R>(&self, path: &str, q: &Q) -> RunnerResult<R>
     where
         Q: ::prost::Message,
@@ -289,17 +351,10 @@ impl<'a> Runner<'a> for OsmosisTestApp {
 
         Q::encode(q, &mut buf).map_err(EncodeError::ProtoEncodeError)?;
 
-        let base64_query_msg_bytes = base64::encode(buf);
-        redefine_as_go_string!(path);
-        redefine_as_go_string!(base64_query_msg_bytes);
-
-        unsafe {
-            let res = Query(self.id, path, base64_query_msg_bytes);
-            let res = RawResult::from_non_null_ptr(res).into_result()?;
-            R::decode(res.as_slice())
-                .map_err(DecodeError::ProtoDecodeError)
-                .map_err(RunnerError::DecodeError)
-        }
+        let res = self.query_raw(path, buf)?;
+        R::decode(res.as_slice())
+            .map_err(DecodeError::ProtoDecodeError)
+            .map_err(RunnerError::DecodeError)
     }
 }
 
@@ -308,7 +363,7 @@ mod tests {
     use std::option::Option::None;
 
     use cosmrs::proto::cosmos::bank::v1beta1::QueryAllBalancesRequest;
-    use cosmwasm_std::{attr, coins, Coin};
+    use cosmwasm_std::{attr, coins, Coin, Empty, QuerierWrapper, Uint128};
 
     use osmosis_std::types::osmosis::tokenfactory::v1beta1::{
         MsgCreateDenom, MsgCreateDenomResponse, QueryParamsRequest, QueryParamsResponse,
@@ -566,5 +621,55 @@ mod tests {
 
         assert_eq!(res.gas_info.gas_wanted, gas_limit);
         assert_eq!(bob_balance, initial_balance - amount.amount.u128());
+    }
+
+    #[test]
+    fn test_querier_impl() {
+        let app = OsmosisTestApp::default();
+        let accs = app
+            .init_accounts(
+                &[
+                    Coin::new(1_000_000_000_000, "uatom"),
+                    Coin::new(1_000_000_000_000, "uosmo"),
+                ],
+                2,
+            )
+            .unwrap();
+        let acc1 = &accs[0];
+        let acc2 = &accs[1];
+        let gamm = Gamm::new(&app);
+
+        // Create pool
+        let pool_liquidity = vec![Coin::new(1_000, "uatom"), Coin::new(1_000, "uosmo")];
+        let _pool_id = gamm
+            .create_basic_pool(&pool_liquidity, &acc1)
+            .unwrap()
+            .data
+            .pool_id;
+
+        let querier = QuerierWrapper::<Empty>::new(&app);
+
+        // Bank::Balance
+        let balance = querier.query_balance(acc2.address(), "uosmo").unwrap();
+        assert_eq!(balance.amount, Uint128::new(1_000_000_000_000));
+
+        // Bank::Supply
+        let supply = querier.query_supply("uosmo").unwrap();
+        assert!(supply.amount > Uint128::zero());
+
+        // TODO: fix this
+        // Stargate Query
+        // let msg = QueryPoolRequest { pool_id };
+        // let mut buf = Vec::new();
+        // QueryPoolRequest::encode(&msg, &mut buf).unwrap();
+        // let res: Vec<u8> = querier
+        //     .query(&QueryRequest::Stargate {
+        //         path: "/osmosis.gamm.v1beta1.Query/Pool".into(),
+        //         data: buf.into(),
+        //     })
+        //     .unwrap();
+        // let res = QueryPoolResponse::decode(&mut res.as_slice()).unwrap();
+        // let pool = gamm::v1beta1::Pool::decode(res.pool.unwrap().value.as_slice()).unwrap();
+        // assert_eq!(pool.id, pool_id);
     }
 }
