@@ -22,7 +22,7 @@ where
     R: Runner<'a>,
 {
     fn_execute! {
-        pub send: MsgSend["/cosmos.bank.v1beta1.Msg/Send"] => MsgSendResponse
+        pub send: MsgSend["/cosmos.bank.v1beta1.MsgSend"] => MsgSendResponse
     }
 
     fn_query! {
