@@ -4,6 +4,7 @@ use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::proto::cosmos::bank::v1beta1::{
     QueryBalanceRequest, QueryBalanceResponse, QuerySupplyOfRequest, QuerySupplyOfResponse,
 };
+use cosmrs::proto::cosmos::base::v1beta1::Coin as ProtoCoin;
 use cosmrs::proto::cosmwasm::wasm::v1::{
     QuerySmartContractStateRequest, QuerySmartContractStateResponse,
 };
@@ -12,8 +13,9 @@ use cosmrs::tx;
 use cosmrs::tx::{Fee, SignerInfo};
 use cosmwasm_std::{
     from_binary, to_binary, BalanceResponse, BankQuery, Coin, ContractResult, Empty, QuerierResult,
-    QueryRequest, SystemResult, WasmQuery,
+    QueryRequest, SystemResult, Uint128, WasmQuery,
 };
+use osmosis_std::types::osmosis::gamm::v1beta1::{QueryPoolRequest, QueryPoolResponse};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
@@ -196,6 +198,7 @@ impl OsmosisTestApp {
 
 impl cosmwasm_std::Querier for OsmosisTestApp {
     fn raw_query(&self, bin_request: &[u8]) -> QuerierResult {
+        println!("bin_request: {:?}", bin_request);
         let x = match from_binary::<QueryRequest<Empty>>(&bin_request.into()).unwrap() {
             QueryRequest::Wasm(wasm_query) => match wasm_query {
                 WasmQuery::Smart { contract_addr, msg } => self
@@ -230,6 +233,7 @@ impl cosmwasm_std::Querier for OsmosisTestApp {
                     .unwrap()
                 }
                 BankQuery::Supply { denom } => {
+                    println!("got in supply match");
                     let supply = self
                         .query::<_, QuerySupplyOfResponse>(
                             "/cosmos.bank.v1beta1.Query/SupplyOf",
@@ -240,6 +244,7 @@ impl cosmwasm_std::Querier for OsmosisTestApp {
                         .unwrap()
                         .amount
                         .unwrap();
+                    println!("after supply");
 
                     // We must copy this struct because the original is non-exhaustive
                     #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -254,7 +259,20 @@ impl cosmwasm_std::Querier for OsmosisTestApp {
                 }
                 _ => todo!("unsupported BankQuery variant"),
             },
-            QueryRequest::Stargate { path, data } => self.query_raw(&path, data.0).unwrap().into(),
+            QueryRequest::Stargate { path, data } => match path.as_str() {
+                "/osmosis.gamm.v1beta1.Query/Pool" => {
+                    let res: QueryPoolRequest = from_binary(&data.0.into()).unwrap();
+                    let query_pool = self
+                        .query::<_, QueryPoolResponse>(
+                            "/osmosis.gamm.v1beta1.Query/Pool",
+                            &QueryPoolRequest { pool_id: 1 },
+                        )
+                        .unwrap();
+
+                    to_binary(&query_pool.encode_to_vec()).unwrap()
+                }
+                &_ => todo!(),
+            },
             _ => todo!("unsupported QueryRequest variant"),
         };
 
@@ -363,11 +381,14 @@ mod tests {
     use std::option::Option::None;
 
     use cosmrs::proto::cosmos::bank::v1beta1::QueryAllBalancesRequest;
-    use cosmwasm_std::{attr, coins, Coin, Empty, QuerierWrapper, Uint128};
+    use cosmwasm_std::{attr, coins, Coin, Empty, QuerierWrapper, QueryRequest, Uint128};
 
+    use osmosis_std::types::osmosis::gamm;
+    use osmosis_std::types::osmosis::gamm::v1beta1::{Pool, QueryPoolRequest, QueryPoolResponse};
     use osmosis_std::types::osmosis::tokenfactory::v1beta1::{
         MsgCreateDenom, MsgCreateDenomResponse, QueryParamsRequest, QueryParamsResponse,
     };
+    use prost::Message;
 
     use crate::account::{Account, FeeSetting};
     use crate::module::Gamm;
@@ -659,17 +680,18 @@ mod tests {
 
         // TODO: fix this
         // Stargate Query
-        // let msg = QueryPoolRequest { pool_id };
-        // let mut buf = Vec::new();
-        // QueryPoolRequest::encode(&msg, &mut buf).unwrap();
-        // let res: Vec<u8> = querier
-        //     .query(&QueryRequest::Stargate {
-        //         path: "/osmosis.gamm.v1beta1.Query/Pool".into(),
-        //         data: buf.into(),
-        //     })
-        //     .unwrap();
-        // let res = QueryPoolResponse::decode(&mut res.as_slice()).unwrap();
-        // let pool = gamm::v1beta1::Pool::decode(res.pool.unwrap().value.as_slice()).unwrap();
-        // assert_eq!(pool.id, pool_id);
+        let pool_id = 1;
+        let msg = QueryPoolRequest { pool_id };
+        let mut buf = Vec::new();
+        QueryPoolRequest::encode(&msg, &mut buf).unwrap();
+        let res: Vec<u8> = querier
+            .query(&QueryRequest::Stargate {
+                path: "/osmosis.gamm.v1beta1.Query/Pool".into(),
+                data: buf.into(),
+            })
+            .unwrap();
+        let res = QueryPoolResponse::decode(&mut res.as_slice()).unwrap();
+        let pool = Pool::decode(res.pool.unwrap().value.as_slice()).unwrap();
+        assert_eq!(pool.id, pool_id);
     }
 }
