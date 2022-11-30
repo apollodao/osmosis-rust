@@ -29,6 +29,15 @@ pub fn proto_coin_to_coin(proto_coin: &cosmrs::proto::cosmos::base::v1beta1::Coi
     }
 }
 
+pub fn osmosis_proto_coin_to_coin(
+    proto_coin: &osmosis_std::types::cosmos::base::v1beta1::Coin,
+) -> Coin {
+    Coin {
+        denom: proto_coin.denom.clone(),
+        amount: proto_coin.amount.parse().unwrap(),
+    }
+}
+
 pub fn proto_coins_to_coins(coins: &[cosmrs::proto::cosmos::base::v1beta1::Coin]) -> Vec<Coin> {
     coins.iter().map(proto_coin_to_coin).collect()
 }
