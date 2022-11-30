@@ -19,8 +19,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::account::{Account, FeeSetting, SigningAccount};
 use crate::bindings::{
-    AccountNumber, AccountSequence, BeginBlock, EndBlock, Execute, InitAccount, InitTestEnv, Query,
-    Simulate,
+    AccountNumber, AccountSequence, BeginBlock, EndBlock, Execute, IncreaseTime, InitAccount,
+    InitTestEnv, Query, Simulate,
 };
 use crate::redefine_as_go_string;
 use crate::runner::error::{DecodeError, EncodeError, RunnerError};
@@ -48,6 +48,13 @@ impl OsmosisTestApp {
     pub fn new() -> Self {
         Self {
             id: unsafe { InitTestEnv() },
+        }
+    }
+
+    /// Increase the time of the blockchain by the given number of seconds.
+    pub fn increase_time(&self, seconds: u64) {
+        unsafe {
+            IncreaseTime(self.id, seconds);
         }
     }
 
