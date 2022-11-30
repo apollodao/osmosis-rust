@@ -2,7 +2,7 @@ use std::ffi::CString;
 
 use cosmrs::crypto::secp256k1::SigningKey;
 use cosmrs::proto::cosmos::bank::v1beta1::{
-    QueryBalanceRequest, QueryBalanceResponse, QuerySupplyOfRequest, QuerySupplyOfResponse,
+    QueryBalanceRequest, QueryBalanceResponse, QuerySupplyOfRequest,
 };
 use cosmrs::proto::cosmwasm::wasm::v1::{
     QuerySmartContractStateRequest, QuerySmartContractStateResponse,
@@ -11,9 +11,10 @@ use cosmrs::proto::tendermint::abci::{RequestDeliverTx, ResponseDeliverTx};
 use cosmrs::tx;
 use cosmrs::tx::{Fee, SignerInfo};
 use cosmwasm_std::{
-    from_binary, to_binary, BalanceResponse, BankQuery, Coin, ContractResult, Empty, QuerierResult,
-    QueryRequest, SystemResult, WasmQuery,
+    from_binary, to_binary, BalanceResponse, BankQuery, Binary, Coin, ContractResult, Empty,
+    QuerierResult, QueryRequest, SystemResult, WasmQuery,
 };
+use osmosis_std::types::cosmos::bank::v1beta1::QuerySupplyOfResponse;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
@@ -27,7 +28,7 @@ use crate::runner::error::{DecodeError, EncodeError, RunnerError};
 use crate::runner::result::RawResult;
 use crate::runner::result::{RunnerExecuteResult, RunnerResult};
 use crate::runner::Runner;
-use crate::utils::proto_coin_to_coin;
+use crate::utils::{osmosis_proto_coin_to_coin, proto_coin_to_coin};
 
 const FEE_DENOM: &str = "uosmo";
 const CHAIN_ID: &str = "osmosis-1";
@@ -255,13 +256,23 @@ impl cosmwasm_std::Querier for OsmosisTestApp {
                         pub amount: Coin,
                     }
                     to_binary(&SupplyResponse {
-                        amount: proto_coin_to_coin(&supply),
+                        amount: osmosis_proto_coin_to_coin(&supply),
                     })
                     .unwrap()
                 }
                 _ => todo!("unsupported BankQuery variant"),
             },
-            QueryRequest::Stargate { path, data } => self.query_raw(&path, data.0).unwrap().into(),
+            QueryRequest::Stargate { path, data } => {
+                let proto_binary: Binary = self.query_raw(&path, data.into()).unwrap().into();
+                to_binary(&match path.as_str() {
+                    "/cosmos.bank.v1beta1.Query/SupplyOf" => {
+                        let proto: QuerySupplyOfResponse = proto_binary.try_into().unwrap();
+                        proto
+                    }
+                    _ => todo!("Unsupported Stargate query. path = {}", path),
+                })
+                .unwrap()
+            }
             _ => todo!("unsupported QueryRequest variant"),
         };
 
