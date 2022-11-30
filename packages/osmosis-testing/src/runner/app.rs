@@ -305,36 +305,45 @@ impl<'a> Runner<'a> for OsmosisTestApp {
     {
         unsafe { BeginBlock(self.id) };
 
-        let fee = match &signer.fee_setting() {
-            FeeSetting::Auto { .. } => self.estimate_fee(msgs.clone(), signer)?,
-            FeeSetting::Custom { amount, gas_limit } => Fee::from_amount_and_gas(
-                cosmrs::Coin {
-                    denom: amount.denom.parse().unwrap(),
-                    amount: amount.amount.to_string().parse().unwrap(),
-                },
-                *gas_limit,
-            ),
+        let execute_multiple_raw_inner = || -> RunnerExecuteResult<R> {
+            let fee = match &signer.fee_setting() {
+                FeeSetting::Auto { .. } => self.estimate_fee(msgs.clone(), signer)?,
+                FeeSetting::Custom { amount, gas_limit } => Fee::from_amount_and_gas(
+                    cosmrs::Coin {
+                        denom: amount.denom.parse().unwrap(),
+                        amount: amount.amount.to_string().parse().unwrap(),
+                    },
+                    *gas_limit,
+                ),
+            };
+
+            let tx = self.create_signed_tx(msgs, signer, fee)?;
+
+            let mut buf = Vec::new();
+            RequestDeliverTx::encode(&RequestDeliverTx { tx }, &mut buf)
+                .map_err(EncodeError::ProtoEncodeError)?;
+
+            let base64_req = base64::encode(buf);
+            redefine_as_go_string!(base64_req);
+            let res = unsafe {
+                let res = Execute(self.id, base64_req);
+                let res = RawResult::from_non_null_ptr(res).into_result()?;
+
+                ResponseDeliverTx::decode(res.as_slice()).map_err(DecodeError::ProtoDecodeError)
+            }?
+            .try_into();
+            res
         };
 
-        let tx = self.create_signed_tx(msgs, signer, fee)?;
-
-        let mut buf = Vec::new();
-        RequestDeliverTx::encode(&RequestDeliverTx { tx }, &mut buf)
-            .map_err(EncodeError::ProtoEncodeError)?;
-
-        let base64_req = base64::encode(buf);
-        redefine_as_go_string!(base64_req);
-        let res = unsafe {
-            let res = Execute(self.id, base64_req);
-            let res = RawResult::from_non_null_ptr(res).into_result()?;
-
-            ResponseDeliverTx::decode(res.as_slice()).map_err(DecodeError::ProtoDecodeError)
-        }?
-        .try_into();
+        // Even if the tx fails we must still call EndBlock
+        let res = execute_multiple_raw_inner().map_err(|e| {
+            unsafe { EndBlock(self.id) };
+            e
+        })?;
 
         unsafe { EndBlock(self.id) };
 
-        res
+        Ok(res)
     }
 
     fn query_raw(&self, path: &str, protobuf: Vec<u8>) -> RunnerResult<Vec<u8>> {
