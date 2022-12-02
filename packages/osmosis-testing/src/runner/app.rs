@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use crate::account::{Account, FeeSetting, SigningAccount};
 use crate::bindings::{
     AccountNumber, AccountSequence, BeginBlock, EndBlock, Execute, IncreaseTime, InitAccount,
-    InitTestEnv, Query, Simulate,
+    InitTestEnv, Query, Simulate, WhitelistAddressForForceUnlock,
 };
 use crate::redefine_as_go_string;
 use crate::runner::error::{DecodeError, EncodeError, RunnerError};
@@ -56,6 +56,13 @@ impl OsmosisTestApp {
     pub fn increase_time(&self, seconds: u64) {
         unsafe {
             IncreaseTime(self.id, seconds);
+        }
+    }
+
+    pub fn whitelist_address_for_force_unlock(&self, address: &str) {
+        redefine_as_go_string!(address);
+        unsafe {
+            WhitelistAddressForForceUnlock(self.id, address);
         }
     }
 
