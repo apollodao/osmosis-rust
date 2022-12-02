@@ -8,6 +8,7 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::runner::error::{DecodeError, EncodeError, RunnerError};
 use crate::runner::result::{RunnerExecuteResult, RunnerResult};
+use crate::utils::coins_to_proto;
 use crate::{
     account::{Account, SigningAccount},
     runner::Runner,
@@ -63,13 +64,7 @@ where
                 code_id,
                 label: label.unwrap_or(" ").to_string(), // empty string causes panic
                 msg: serde_json::to_vec(msg).map_err(EncodeError::JsonEncodeError)?,
-                funds: funds
-                    .iter()
-                    .map(|c| cosmrs::proto::cosmos::base::v1beta1::Coin {
-                        denom: c.denom.parse().unwrap(),
-                        amount: format!("{}", c.amount.u128()),
-                    })
-                    .collect(),
+                funds: coins_to_proto(funds),
             },
             "/cosmwasm.wasm.v1.MsgInstantiateContract",
             signer,
@@ -90,13 +85,7 @@ where
             MsgExecuteContract {
                 sender: signer.address(),
                 msg: serde_json::to_vec(msg).map_err(EncodeError::JsonEncodeError)?,
-                funds: funds
-                    .iter()
-                    .map(|c| cosmrs::proto::cosmos::base::v1beta1::Coin {
-                        denom: c.denom.parse().unwrap(),
-                        amount: format!("{}", c.amount.u128()),
-                    })
-                    .collect(),
+                funds: coins_to_proto(funds),
                 contract: contract.to_owned(),
             },
             "/cosmwasm.wasm.v1.MsgExecuteContract",
