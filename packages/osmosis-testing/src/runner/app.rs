@@ -15,6 +15,9 @@ use cosmwasm_std::{
     QuerierResult, QueryRequest, SystemResult, WasmQuery,
 };
 use osmosis_std::types::cosmos::bank::v1beta1::QuerySupplyOfResponse;
+use osmosis_std::types::osmosis::gamm::v1beta1::{
+    QueryCalcJoinPoolNoSwapSharesResponse, QueryCalcJoinPoolSharesResponse,
+};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
@@ -264,14 +267,23 @@ impl cosmwasm_std::Querier for OsmosisTestApp {
             },
             QueryRequest::Stargate { path, data } => {
                 let proto_binary: Binary = self.query_raw(&path, data.into()).unwrap().into();
-                to_binary(&match path.as_str() {
+                match path.as_str() {
                     "/cosmos.bank.v1beta1.Query/SupplyOf" => {
                         let proto: QuerySupplyOfResponse = proto_binary.try_into().unwrap();
-                        proto
+                        to_binary(&proto).unwrap()
+                    }
+                    "/osmosis.gamm.v1beta1.Query/CalcJoinPoolNoSwapShares" => {
+                        let proto: QueryCalcJoinPoolNoSwapSharesResponse =
+                            proto_binary.try_into().unwrap();
+                        to_binary(&proto).unwrap()
+                    }
+                    "/osmosis.gamm.v1beta1.Query/CalcJoinPoolShares" => {
+                        let proto: QueryCalcJoinPoolSharesResponse =
+                            proto_binary.try_into().unwrap();
+                        to_binary(&proto).unwrap()
                     }
                     _ => todo!("Unsupported Stargate query. path = {}", path),
-                })
-                .unwrap()
+                }
             }
             _ => todo!("unsupported QueryRequest variant"),
         };
