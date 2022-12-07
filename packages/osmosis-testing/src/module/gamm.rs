@@ -1,5 +1,8 @@
 use cosmwasm_std::{Coin, StdResult};
 use osmosis_std::types::osmosis::gamm;
+use osmosis_std::types::osmosis::gamm::poolmodels::stableswap::v1beta1::{
+    MsgCreateStableswapPool, MsgCreateStableswapPoolResponse,
+};
 use osmosis_std::types::osmosis::gamm::{
     poolmodels::balancer::v1beta1::{MsgCreateBalancerPool, MsgCreateBalancerPoolResponse},
     v1beta1::{PoolAsset, PoolParams, QueryPoolRequest, QueryPoolResponse},
@@ -31,6 +34,10 @@ where
 {
     fn_execute! {
         pub create_balancer_pool: MsgCreateBalancerPool => MsgCreateBalancerPoolResponse
+    }
+
+    fn_execute! {
+        pub create_stable_swap_pool: MsgCreateStableswapPool => MsgCreateStableswapPoolResponse
     }
 
     fn_query! {
