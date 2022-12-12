@@ -17,6 +17,7 @@ serde = "1.0.144"
 serde_json = "1.0.85"
 thiserror = "1.0.34"
 itertools = "0.10.5"
+tonic = { version="0.8", default-features = false, features = ["transport"] }
 
 [build-dependencies]
 bindgen = "0.60.1"
