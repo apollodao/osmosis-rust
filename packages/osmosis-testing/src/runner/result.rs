@@ -159,7 +159,7 @@ impl RawResult {
         let content = &bytes[1..];
 
         if code == 0 {
-            let res = CString::new(content).unwrap().into_bytes();
+            let res = content.to_vec();
 
             Some(Self(Ok(res)))
         } else {
