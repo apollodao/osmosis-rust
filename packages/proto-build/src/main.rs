@@ -11,23 +11,27 @@ use proto_build::{
 };
 
 /// The Cosmos SDK commit or tag to be cloned and used to build the proto files
-const COSMOS_SDK_REV: &str = "osmosis-main";
+const COSMOS_SDK_REV: &str = "v0.45.15-ics";
 
 /// The osmosis commit or tag to be cloned and used to build the proto files
 const OSMOSIS_REV: &str = "v16.0.0";
 
+const NEUTRON_REV: &str = "a779efe977e679b4632407a9685f2a6cafa4e50a";
+
 /// The wasmd commit or tag to be cloned and used to build the proto files
-const WASMD_REV: &str = "v0.31.0-osmo-v16";
+const WASMD_REV: &str = "v0.31.0";
 
 // All paths must end with a / and either be absolute or include a ./ to reference the current
 // working directory.
 
 /// The directory generated cosmos-sdk proto files go into in this repo
-const OUT_DIR: &str = "../osmosis-std/src/types/";
+const OUT_DIR: &str = "../neutron-std/src/types/";
 /// Directory where the cosmos-sdk submodule is located
 const COSMOS_SDK_DIR: &str = "../../dependencies/cosmos-sdk/";
 /// Directory where the osmosis submodule is located
 const OSMOSIS_DIR: &str = "../../dependencies/osmosis/";
+/// Directory where the neutron submodule is located
+const NEUTRON_DIR: &str = "../../dependencies/neutron/";
 /// Directory where the wasmd submodule is located
 const WASMD_DIR: &str = "../../dependencies/wasmd/";
 
@@ -39,13 +43,20 @@ pub fn generate() {
     if args.iter().any(|arg| arg == "--update-deps") {
         git::update_submodule(COSMOS_SDK_DIR, COSMOS_SDK_REV);
         git::update_submodule(OSMOSIS_DIR, OSMOSIS_REV);
+        git::update_submodule(NEUTRON_DIR, NEUTRON_REV);
         git::update_submodule(WASMD_DIR, WASMD_REV);
     }
 
     let tmp_build_dir: PathBuf = TMP_BUILD_DIR.parse().unwrap();
     let out_dir: PathBuf = OUT_DIR.parse().unwrap();
 
-    let osmosis_project = CosmosProject {
+    let neutron_project = CosmosProject {
+        name: "neutron".to_string(),
+        version: NEUTRON_REV.to_string(),
+        project_dir: NEUTRON_DIR.to_string(),
+        include_mods: vec![],
+    };
+    let _osmosis_project = CosmosProject {
         name: "osmosis".to_string(),
         version: OSMOSIS_REV.to_string(),
         project_dir: OSMOSIS_DIR.to_string(),
@@ -77,7 +88,7 @@ pub fn generate() {
     let osmosis_code_generator = CodeGenerator::new(
         out_dir,
         tmp_build_dir,
-        osmosis_project,
+        neutron_project,
         vec![cosmos_project, wasmd_project],
     );
 
