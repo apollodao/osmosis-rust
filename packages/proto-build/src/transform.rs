@@ -58,6 +58,7 @@ fn copy_and_transform(
     dest: impl AsRef<Path>,
     descriptor: &FileDescriptorSet,
 ) -> io::Result<()> {
+    debug!("copy_and_transform: {:?} -> {:?}", src, dest.as_ref());
     // Skip proto files belonging to `EXCLUDED_PROTO_PACKAGES`
     for package in EXCLUDED_PROTO_PACKAGES {
         if let Some(filename) = src.file_name().and_then(OsStr::to_str) {

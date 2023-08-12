@@ -1,11 +1,9 @@
 [submodule "dependencies/cosmos-sdk"]
 	path = dependencies/cosmos-sdk
-	url = https://github.com/osmosis-labs/cosmos-sdk.git
-	branch = v13.x
+	url = https://github.com/cosmos/cosmos-sdk.git
 [submodule "dependencies/osmosis"]
 	path = dependencies/osmosis
 	url = https://github.com/osmosis-labs/osmosis.git
-	branch = v13.x
 [submodule "wasmd"]
 	path = dependencies/wasmd
 	url = https://github.com/CosmWasm/wasmd.git
@@ -15,8 +13,9 @@
 [submodule "dependencies/ibc-go"]
 	path = dependencies/ibc-go
 	url = https://github.com/cosmos/ibc-go.git
-[submodule "dependencies/wasmd"]
-	url = https://github.com/osmosis-labs/wasmd.git
 [submodule "dependencies/ics23"]
 	path = dependencies/ics23
 	url = https://github.com/cosmos/ics23.git
+[submodule "dependencies/neutron"]
+	path = dependencies/neutron
+	url = https://github.com/neutron-org/neutron.git

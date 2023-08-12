@@ -491,6 +491,12 @@ fn extract_type_path_from_descriptor(
     })
 }
 
+pub fn extract_type_path_from_service_str(s: &str) -> String {
+    let mut parts: Vec<_> = s.trim_start_matches('.').split('.').collect();
+    parts.pop();
+    parts.join(".")
+}
+
 fn extract_type_path_from_enum(
     target: &str,
     enum_type: &[EnumDescriptorProto],
@@ -562,6 +568,13 @@ pub fn append_querier(
         };
 
         let method_desc = method_desc.clone();
+
+        // Some requests are defined in other packages and imported, but end up in the
+        // ServiceDescriptorProto anyway, so we need to filter them out
+        let req_package = extract_type_path_from_service_str(method_desc.input_type.as_ref().unwrap());
+        if req_package != package {
+            return quote! {};
+        }
 
         let name = format_ident!("{}", method_desc.name.unwrap().as_str().to_snake_case());
         let req_type = format_ident!("{}", method_desc.input_type.unwrap().split('.').last().unwrap().to_string().to_upper_camel_case());

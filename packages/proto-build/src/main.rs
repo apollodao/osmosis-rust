@@ -11,19 +11,21 @@ use proto_build::{
 };
 
 /// The Cosmos SDK commit or tag to be cloned and used to build the proto files
-const COSMOS_SDK_REV: &str = "v0.47.5-osmo";
+const COSMOS_SDK_REV: &str = "v0.50.7";
 
 /// The osmosis commit or tag to be cloned and used to build the proto files
 const OSMOSIS_REV: &str = "v25.0.0";
 
+const NEUTRON_REV: &str = "main";
+
 /// The wasmd commit or tag to be cloned and used to build the proto files
-const WASMD_REV: &str = "v0.45.0-osmo";
+const WASMD_REV: &str = "v0.51.0";
 
 /// The cometbft commit or tag to be cloned and used to build the proto files
-const COMETBFT_REV: &str = "v0.37.2";
+const COMETBFT_REV: &str = "v0.38.7";
 
 /// The ibc-go commit or tag to be cloned and used to build the proto files
-const IBC_GO_REV: &str = "v7.3.1";
+const IBC_GO_REV: &str = "v8.3.2";
 
 /// The ics23 commit or tag to be cloned and used to build the proto files
 ///
@@ -37,11 +39,13 @@ const ICS23_REV: &str = "rust/v0.10.0";
 // working directory.
 
 /// The directory generated cosmos-sdk proto files go into in this repo
-const OUT_DIR: &str = "../osmosis-std/src/types/";
+const OUT_DIR: &str = "../neutron-std/src/types/";
 /// Directory where the cosmos-sdk submodule is located
 const COSMOS_SDK_DIR: &str = "../../dependencies/cosmos-sdk/";
 /// Directory where the osmosis submodule is located
 const OSMOSIS_DIR: &str = "../../dependencies/osmosis/";
+/// Directory where the neutron submodule is located
+const NEUTRON_DIR: &str = "../../dependencies/neutron/";
 /// Directory where the wasmd submodule is located
 const WASMD_DIR: &str = "../../dependencies/wasmd/";
 /// Directory where the cometbft submodule is located
@@ -59,6 +63,7 @@ pub fn generate() {
     if args.iter().any(|arg| arg == "--update-deps") {
         git::update_submodule(COSMOS_SDK_DIR, COSMOS_SDK_REV);
         git::update_submodule(OSMOSIS_DIR, OSMOSIS_REV);
+        git::update_submodule(NEUTRON_DIR, NEUTRON_REV);
         git::update_submodule(WASMD_DIR, WASMD_REV);
         git::update_submodule(COMETBFT_DIR, COMETBFT_REV);
         git::update_submodule(IBC_GO_DIR, IBC_GO_REV);
@@ -68,7 +73,13 @@ pub fn generate() {
     let tmp_build_dir: PathBuf = TMP_BUILD_DIR.parse().unwrap();
     let out_dir: PathBuf = OUT_DIR.parse().unwrap();
 
-    let osmosis_project = CosmosProject {
+    let neutron_project = CosmosProject {
+        name: "neutron".to_string(),
+        version: NEUTRON_REV.to_string(),
+        project_dir: NEUTRON_DIR.to_string(),
+        exclude_mods: vec![],
+    };
+    let _osmosis_project = CosmosProject {
         name: "osmosis".to_string(),
         version: OSMOSIS_REV.to_string(),
         project_dir: OSMOSIS_DIR.to_string(),
@@ -111,7 +122,7 @@ pub fn generate() {
     let osmosis_code_generator = CodeGenerator::new(
         out_dir,
         tmp_build_dir,
-        osmosis_project,
+        neutron_project,
         vec![
             ibc_project,
             cometbft_project,
