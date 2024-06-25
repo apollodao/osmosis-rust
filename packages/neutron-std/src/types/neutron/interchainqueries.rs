@@ -126,6 +126,10 @@ pub struct KvKey {
     pub path: ::prost::alloc::string::String,
     /// Key you want to read from the storage
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key: ::prost::alloc::vec::Vec<u8>,
 }
 /// GenesisState defines the interchainqueries module's genesis state.
@@ -286,9 +290,17 @@ pub struct StorageValue {
     pub storage_prefix: ::prost::alloc::string::String,
     /// is the key in IAVL store
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key: ::prost::alloc::vec::Vec<u8>,
     /// is the value in IAVL store
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub value: ::prost::alloc::vec::Vec<u8>,
     /// is the Merkle Proof which proves existence of key-value pair in IAVL
     /// storage
@@ -333,7 +345,7 @@ pub struct Block {
 #[proto_message(type_url = "/neutron.interchainqueries.TxValue")]
 pub struct TxValue {
     #[prost(message, optional, tag = "1")]
-    pub response: ::core::option::Option<super::super::tendermint::abci::ResponseDeliverTx>,
+    pub response: ::core::option::Option<super::super::tendermint::abci::ExecTxResult>,
     /// is the Merkle Proof which proves existence of response in block with height
     /// next_block_header.Height
     #[prost(message, optional, tag = "2")]
@@ -344,6 +356,10 @@ pub struct TxValue {
     pub inclusion_proof: ::core::option::Option<super::super::tendermint::crypto::Proof>,
     /// is body of the transaction
     #[prost(bytes = "vec", tag = "4")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -443,6 +459,48 @@ pub struct MsgUpdateInterchainQueryRequest {
 )]
 #[proto_message(type_url = "/neutron.interchainqueries.MsgUpdateInterchainQueryResponse")]
 pub struct MsgUpdateInterchainQueryResponse {}
+/// MsgUpdateParams is the MsgUpdateParams request type.
+///
+/// Since: 0.47
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.interchainqueries.MsgUpdateParams")]
+pub struct MsgUpdateParams {
+    /// Authority is the address of the governance account.
+    #[prost(string, tag = "1")]
+    pub authority: ::prost::alloc::string::String,
+    /// params defines the x/interchainqueries parameters to update.
+    ///
+    /// NOTE: All parameters must be supplied.
+    #[prost(message, optional, tag = "2")]
+    pub params: ::core::option::Option<Params>,
+}
+/// MsgUpdateParamsResponse defines the response structure for executing a
+/// MsgUpdateParams message.
+///
+/// Since: 0.47
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.interchainqueries.MsgUpdateParamsResponse")]
+pub struct MsgUpdateParamsResponse {}
 /// QueryParamsRequest is request type for the Query/Params RPC method.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(
@@ -633,6 +691,10 @@ pub struct Transaction {
     )]
     pub height: u64,
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

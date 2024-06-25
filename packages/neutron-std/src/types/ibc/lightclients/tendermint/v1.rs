@@ -37,7 +37,8 @@ pub struct ClientState {
     pub latest_height: ::core::option::Option<super::super::super::core::client::v1::Height>,
     /// Proof specifications used in verifying counterparty state
     #[prost(message, repeated, tag = "8")]
-    pub proof_specs: ::prost::alloc::vec::Vec<super::super::super::super::ics23::ProofSpec>,
+    pub proof_specs:
+        ::prost::alloc::vec::Vec<super::super::super::super::cosmos::ics23::v1::ProofSpec>,
     /// Path at which next upgraded client will be committed.
     /// Each element corresponds to the key for a single CommitmentProof in the
     /// chained proof. NOTE: ClientState must stored under
@@ -47,12 +48,12 @@ pub struct ClientState {
     /// "upgradedIBCState"}`
     #[prost(string, repeated, tag = "9")]
     pub upgrade_path: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    /// This flag, when set to true, will allow governance to recover a client
-    /// which has expired
+    /// allow_update_after_expiry is deprecated
+    #[deprecated]
     #[prost(bool, tag = "10")]
     pub allow_update_after_expiry: bool,
-    /// This flag, when set to true, will allow governance to unfreeze a client
-    /// whose chain has experienced a misbehaviour event
+    /// allow_update_after_misbehaviour is deprecated
+    #[deprecated]
     #[prost(bool, tag = "11")]
     pub allow_update_after_misbehaviour: bool,
 }
@@ -78,6 +79,10 @@ pub struct ConsensusState {
     #[prost(message, optional, tag = "2")]
     pub root: ::core::option::Option<super::super::super::core::commitment::v1::MerkleRoot>,
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub next_validators_hash: ::prost::alloc::vec::Vec<u8>,
 }
 /// Misbehaviour is a wrapper over two conflicting Headers
@@ -95,6 +100,8 @@ pub struct ConsensusState {
 )]
 #[proto_message(type_url = "/ibc.lightclients.tendermint.v1.Misbehaviour")]
 pub struct Misbehaviour {
+    /// ClientID is deprecated
+    #[deprecated]
     #[prost(string, tag = "1")]
     #[serde(alias = "clientID")]
     pub client_id: ::prost::alloc::string::String,

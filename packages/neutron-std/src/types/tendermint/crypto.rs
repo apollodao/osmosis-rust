@@ -25,6 +25,10 @@ pub struct Proof {
     )]
     pub index: i64,
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub leaf_hash: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", repeated, tag = "4")]
     pub aunts: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
@@ -44,6 +48,10 @@ pub struct Proof {
 pub struct ValueOp {
     /// Encoded in ProofOp.Key.
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key: ::prost::alloc::vec::Vec<u8>,
     /// To encode in ProofOp.Data
     #[prost(message, optional, tag = "2")]
@@ -88,8 +96,16 @@ pub struct ProofOp {
     #[prost(string, tag = "1")]
     pub r#type: ::prost::alloc::string::String,
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
 /// ProofOps is Merkle proof defined by the list of ProofOps
@@ -109,7 +125,7 @@ pub struct ProofOps {
     #[prost(message, repeated, tag = "1")]
     pub ops: ::prost::alloc::vec::Vec<ProofOp>,
 }
-/// PublicKey defines the keys available for use with Tendermint Validators
+/// PublicKey defines the keys available for use with Validators
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(
     Clone,

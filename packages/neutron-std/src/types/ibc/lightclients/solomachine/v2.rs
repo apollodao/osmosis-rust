@@ -90,6 +90,10 @@ pub struct Header {
     )]
     pub timestamp: u64,
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub signature: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "4")]
     pub new_public_key: ::core::option::Option<crate::shim::Any>,
@@ -141,6 +145,10 @@ pub struct Misbehaviour {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.SignatureAndData")]
 pub struct SignatureAndData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub signature: ::prost::alloc::vec::Vec<u8>,
     #[prost(enumeration = "DataType", tag = "2")]
     #[serde(
@@ -149,6 +157,10 @@ pub struct SignatureAndData {
     )]
     pub data_type: i32,
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub data: ::prost::alloc::vec::Vec<u8>,
     #[prost(uint64, tag = "4")]
     #[serde(
@@ -173,6 +185,10 @@ pub struct SignatureAndData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.TimestampedSignatureData")]
 pub struct TimestampedSignatureData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub signature_data: ::prost::alloc::vec::Vec<u8>,
     #[prost(uint64, tag = "2")]
     #[serde(
@@ -218,6 +234,10 @@ pub struct SignBytes {
     pub data_type: i32,
     /// marshaled data
     #[prost(bytes = "vec", tag = "5")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
 /// HeaderData returns the SignBytes data for update verification.
@@ -256,6 +276,10 @@ pub struct HeaderData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.ClientStateData")]
 pub struct ClientStateData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "2")]
     pub client_state: ::core::option::Option<crate::shim::Any>,
@@ -276,6 +300,10 @@ pub struct ClientStateData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.ConsensusStateData")]
 pub struct ConsensusStateData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "2")]
     pub consensus_state: ::core::option::Option<crate::shim::Any>,
@@ -296,6 +324,10 @@ pub struct ConsensusStateData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.ConnectionStateData")]
 pub struct ConnectionStateData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "2")]
     pub connection:
@@ -317,6 +349,10 @@ pub struct ConnectionStateData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.ChannelStateData")]
 pub struct ChannelStateData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "2")]
     pub channel: ::core::option::Option<super::super::super::core::channel::v1::Channel>,
@@ -337,8 +373,16 @@ pub struct ChannelStateData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.PacketCommitmentData")]
 pub struct PacketCommitmentData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub commitment: ::prost::alloc::vec::Vec<u8>,
 }
 /// PacketAcknowledgementData returns the SignBytes data for acknowledgement
@@ -357,8 +401,16 @@ pub struct PacketCommitmentData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.PacketAcknowledgementData")]
 pub struct PacketAcknowledgementData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub acknowledgement: ::prost::alloc::vec::Vec<u8>,
 }
 /// PacketReceiptAbsenceData returns the SignBytes data for
@@ -377,6 +429,10 @@ pub struct PacketAcknowledgementData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.PacketReceiptAbsenceData")]
 pub struct PacketReceiptAbsenceData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<u8>,
 }
 /// NextSequenceRecvData returns the SignBytes data for verification of the next
@@ -395,6 +451,10 @@ pub struct PacketReceiptAbsenceData {
 #[proto_message(type_url = "/ibc.lightclients.solomachine.v2.NextSequenceRecvData")]
 pub struct NextSequenceRecvData {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<u8>,
     #[prost(uint64, tag = "2")]
     #[serde(

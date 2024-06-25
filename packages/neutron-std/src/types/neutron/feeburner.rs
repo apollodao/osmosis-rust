@@ -57,6 +57,7 @@ pub struct TotalBurnedNeutronsAmount {
 pub struct GenesisState {
     #[prost(message, optional, tag = "1")]
     pub params: ::core::option::Option<Params>,
+    /// this line is used by starport scaffolding # genesis/proto/state
     #[prost(message, optional, tag = "2")]
     pub total_burned_neutrons_amount: ::core::option::Option<TotalBurnedNeutronsAmount>,
 }
@@ -133,6 +134,48 @@ pub struct QueryTotalBurnedNeutronsAmountResponse {
     #[prost(message, optional, tag = "1")]
     pub total_burned_neutrons_amount: ::core::option::Option<TotalBurnedNeutronsAmount>,
 }
+/// MsgUpdateParams is the MsgUpdateParams request type.
+///
+/// Since: 0.47
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.feeburner.MsgUpdateParams")]
+pub struct MsgUpdateParams {
+    /// Authority is the address of the governance account.
+    #[prost(string, tag = "1")]
+    pub authority: ::prost::alloc::string::String,
+    /// params defines the x/feeburner parameters to update.
+    ///
+    /// NOTE: All parameters must be supplied.
+    #[prost(message, optional, tag = "2")]
+    pub params: ::core::option::Option<Params>,
+}
+/// MsgUpdateParamsResponse defines the response structure for executing a
+/// MsgUpdateParams message.
+///
+/// Since: 0.47
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.feeburner.MsgUpdateParamsResponse")]
+pub struct MsgUpdateParamsResponse {}
 pub struct FeeburnerQuerier<'a, Q: cosmwasm_std::CustomQuery> {
     querier: &'a cosmwasm_std::QuerierWrapper<'a, Q>,
 }

@@ -316,6 +316,10 @@ pub struct QueryConnectionResponse {
     pub connection: ::core::option::Option<ConnectionEnd>,
     /// merkle proof of existence
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof: ::prost::alloc::vec::Vec<u8>,
     /// height at which the proof was retrieved
     #[prost(message, optional, tag = "3")]
@@ -416,6 +420,10 @@ pub struct QueryClientConnectionsResponse {
     pub connection_paths: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     /// merkle proof of existence
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof: ::prost::alloc::vec::Vec<u8>,
     /// height at which the proof was generated
     #[prost(message, optional, tag = "3")]
@@ -466,6 +474,10 @@ pub struct QueryConnectionClientStateResponse {
         ::core::option::Option<super::super::client::v1::IdentifiedClientState>,
     /// merkle proof of existence
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof: ::prost::alloc::vec::Vec<u8>,
     /// height at which the proof was retrieved
     #[prost(message, optional, tag = "3")]
@@ -531,10 +543,50 @@ pub struct QueryConnectionConsensusStateResponse {
     pub client_id: ::prost::alloc::string::String,
     /// merkle proof of existence
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof: ::prost::alloc::vec::Vec<u8>,
     /// height at which the proof was retrieved
     #[prost(message, optional, tag = "4")]
     pub proof_height: ::core::option::Option<super::super::client::v1::Height>,
+}
+/// QueryConnectionParamsRequest is the request type for the Query/ConnectionParams RPC method.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/ibc.core.connection.v1.QueryConnectionParamsRequest")]
+#[proto_query(
+    path = "/ibc.core.connection.v1.Query/ConnectionParams",
+    response_type = QueryConnectionParamsResponse
+)]
+pub struct QueryConnectionParamsRequest {}
+/// QueryConnectionParamsResponse is the response type for the Query/ConnectionParams RPC method.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/ibc.core.connection.v1.QueryConnectionParamsResponse")]
+pub struct QueryConnectionParamsResponse {
+    /// params defines the parameters of the module.
+    #[prost(message, optional, tag = "1")]
+    pub params: ::core::option::Option<Params>,
 }
 /// MsgConnectionOpenInit defines the msg sent by an account on Chain A to
 /// initialize a connection with Chain B.
@@ -600,8 +652,8 @@ pub struct MsgConnectionOpenTry {
     #[prost(string, tag = "1")]
     #[serde(alias = "clientID")]
     pub client_id: ::prost::alloc::string::String,
-    /// in the case of crossing hello's, when both chains call OpenInit, we need
-    /// the connection identifier of the previous connection in state INIT
+    /// Deprecated: this field is unused. Crossing hellos are no longer supported in core IBC.
+    #[deprecated]
     #[prost(string, tag = "2")]
     #[serde(alias = "previous_connectionID")]
     pub previous_connection_id: ::prost::alloc::string::String,
@@ -622,17 +674,36 @@ pub struct MsgConnectionOpenTry {
     /// proof of the initialization the connection on Chain A: `UNITIALIZED ->
     /// INIT`
     #[prost(bytes = "vec", tag = "8")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof_init: ::prost::alloc::vec::Vec<u8>,
     /// proof of client state included in message
     #[prost(bytes = "vec", tag = "9")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof_client: ::prost::alloc::vec::Vec<u8>,
     /// proof of client consensus state
     #[prost(bytes = "vec", tag = "10")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof_consensus: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "11")]
     pub consensus_height: ::core::option::Option<super::super::client::v1::Height>,
     #[prost(string, tag = "12")]
     pub signer: ::prost::alloc::string::String,
+    /// optional proof data for host state machines that are unable to introspect their own consensus state
+    #[prost(bytes = "vec", tag = "13")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
+    pub host_consensus_state_proof: ::prost::alloc::vec::Vec<u8>,
 }
 /// MsgConnectionOpenTryResponse defines the Msg/ConnectionOpenTry response type.
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -678,17 +749,36 @@ pub struct MsgConnectionOpenAck {
     /// proof of the initialization the connection on Chain B: `UNITIALIZED ->
     /// TRYOPEN`
     #[prost(bytes = "vec", tag = "6")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof_try: ::prost::alloc::vec::Vec<u8>,
     /// proof of client state included in message
     #[prost(bytes = "vec", tag = "7")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof_client: ::prost::alloc::vec::Vec<u8>,
     /// proof of client consensus state
     #[prost(bytes = "vec", tag = "8")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof_consensus: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "9")]
     pub consensus_height: ::core::option::Option<super::super::client::v1::Height>,
     #[prost(string, tag = "10")]
     pub signer: ::prost::alloc::string::String,
+    /// optional proof data for host state machines that are unable to introspect their own consensus state
+    #[prost(bytes = "vec", tag = "11")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
+    pub host_consensus_state_proof: ::prost::alloc::vec::Vec<u8>,
 }
 /// MsgConnectionOpenAckResponse defines the Msg/ConnectionOpenAck response type.
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -724,6 +814,10 @@ pub struct MsgConnectionOpenConfirm {
     pub connection_id: ::prost::alloc::string::String,
     /// proof for the change of the connection state on Chain A: `INIT -> OPEN`
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub proof_ack: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "3")]
     pub proof_height: ::core::option::Option<super::super::client::v1::Height>,
@@ -745,6 +839,43 @@ pub struct MsgConnectionOpenConfirm {
 )]
 #[proto_message(type_url = "/ibc.core.connection.v1.MsgConnectionOpenConfirmResponse")]
 pub struct MsgConnectionOpenConfirmResponse {}
+/// MsgUpdateParams defines the sdk.Msg type to update the connection parameters.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/ibc.core.connection.v1.MsgUpdateParams")]
+pub struct MsgUpdateParams {
+    /// signer address
+    #[prost(string, tag = "1")]
+    pub signer: ::prost::alloc::string::String,
+    /// params defines the connection parameters to update.
+    ///
+    /// NOTE: All parameters must be supplied.
+    #[prost(message, optional, tag = "2")]
+    pub params: ::core::option::Option<Params>,
+}
+/// MsgUpdateParamsResponse defines the MsgUpdateParams response type.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/ibc.core.connection.v1.MsgUpdateParamsResponse")]
+pub struct MsgUpdateParamsResponse {}
 pub struct ConnectionQuerier<'a, Q: cosmwasm_std::CustomQuery> {
     querier: &'a cosmwasm_std::QuerierWrapper<'a, Q>,
 }
@@ -790,5 +921,10 @@ impl<'a, Q: cosmwasm_std::CustomQuery> ConnectionQuerier<'a, Q> {
             revision_height,
         }
         .query(self.querier)
+    }
+    pub fn connection_params(
+        &self,
+    ) -> Result<QueryConnectionParamsResponse, cosmwasm_std::StdError> {
+        QueryConnectionParamsRequest {}.query(self.querier)
     }
 }

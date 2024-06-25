@@ -67,10 +67,48 @@ pub struct MsgTransferResponse {
         deserialize_with = "crate::serde::as_str::deserialize"
     )]
     pub sequence_id: u64,
-    /// channel src channel on neutron side trasaction was submitted from
+    /// channel src channel on neutron side transaction was submitted from
     #[prost(string, tag = "2")]
     pub channel: ::prost::alloc::string::String,
 }
+/// MsgUpdateParams is the Msg/UpdateParams request type.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.transfer.MsgUpdateParams")]
+pub struct MsgUpdateParams {
+    /// signer address
+    #[prost(string, tag = "1")]
+    pub signer: ::prost::alloc::string::String,
+    /// params defines the transfer parameters to update.
+    ///
+    /// NOTE: All parameters must be supplied.
+    #[prost(message, optional, tag = "2")]
+    pub params: ::core::option::Option<super::super::ibc::applications::transfer::v1::Params>,
+}
+/// MsgUpdateParamsResponse defines the response structure for executing a
+/// MsgUpdateParams message.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.transfer.MsgUpdateParamsResponse")]
+pub struct MsgUpdateParamsResponse {}
 pub struct TransferQuerier<'a, Q: cosmwasm_std::CustomQuery> {
     querier: &'a cosmwasm_std::QuerierWrapper<'a, Q>,
 }

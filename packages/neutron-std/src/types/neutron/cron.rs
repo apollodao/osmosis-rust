@@ -115,6 +115,7 @@ pub struct ScheduleCount {
 pub struct GenesisState {
     #[prost(message, repeated, tag = "2")]
     pub schedule_list: ::prost::alloc::vec::Vec<Schedule>,
+    /// this line is used by starport scaffolding # genesis/proto/state
     #[prost(message, optional, tag = "1")]
     pub params: ::core::option::Option<Params>,
 }
@@ -224,6 +225,48 @@ pub struct QuerySchedulesResponse {
     pub pagination:
         ::core::option::Option<super::super::cosmos::base::query::v1beta1::PageResponse>,
 }
+/// MsgUpdateParams is the MsgUpdateParams request type.
+///
+/// Since: 0.47
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.cron.MsgUpdateParams")]
+pub struct MsgUpdateParams {
+    /// Authority is the address of the governance account.
+    #[prost(string, tag = "1")]
+    pub authority: ::prost::alloc::string::String,
+    /// params defines the x/cron parameters to update.
+    ///
+    /// NOTE: All parameters must be supplied.
+    #[prost(message, optional, tag = "2")]
+    pub params: ::core::option::Option<Params>,
+}
+/// MsgUpdateParamsResponse defines the response structure for executing a
+/// MsgUpdateParams message.
+///
+/// Since: 0.47
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.cron.MsgUpdateParamsResponse")]
+pub struct MsgUpdateParamsResponse {}
 pub struct CronQuerier<'a, Q: cosmwasm_std::CustomQuery> {
     querier: &'a cosmwasm_std::QuerierWrapper<'a, Q>,
 }

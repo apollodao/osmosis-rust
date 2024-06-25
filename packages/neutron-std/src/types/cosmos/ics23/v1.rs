@@ -30,11 +30,19 @@ use osmosis_std_derive::CosmwasmExt;
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.ExistenceProof")]
+#[proto_message(type_url = "/cosmos.ics23.v1.ExistenceProof")]
 pub struct ExistenceProof {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub value: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "3")]
     pub leaf: ::core::option::Option<LeafOp>,
@@ -56,10 +64,14 @@ pub struct ExistenceProof {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.NonExistenceProof")]
+#[proto_message(type_url = "/cosmos.ics23.v1.NonExistenceProof")]
 pub struct NonExistenceProof {
     /// TODO: remove this as unnecessary??? we prove a range
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "2")]
     pub left: ::core::option::Option<ExistenceProof>,
@@ -79,7 +91,7 @@ pub struct NonExistenceProof {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.CommitmentProof")]
+#[proto_message(type_url = "/cosmos.ics23.v1.CommitmentProof")]
 pub struct CommitmentProof {
     #[prost(oneof = "commitment_proof::Proof", tags = "1, 2, 3, 4")]
     pub proof: ::core::option::Option<commitment_proof::Proof>,
@@ -134,7 +146,7 @@ pub mod commitment_proof {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.LeafOp")]
+#[proto_message(type_url = "/cosmos.ics23.v1.LeafOp")]
 pub struct LeafOp {
     #[prost(enumeration = "HashOp", tag = "1")]
     #[serde(
@@ -163,6 +175,10 @@ pub struct LeafOp {
     /// prefix is a fixed bytes that may optionally be included at the beginning to differentiate
     /// a leaf node from an inner node.
     #[prost(bytes = "vec", tag = "5")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub prefix: ::prost::alloc::vec::Vec<u8>,
 }
 /// *
@@ -192,7 +208,7 @@ pub struct LeafOp {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.InnerOp")]
+#[proto_message(type_url = "/cosmos.ics23.v1.InnerOp")]
 pub struct InnerOp {
     #[prost(enumeration = "HashOp", tag = "1")]
     #[serde(
@@ -201,8 +217,16 @@ pub struct InnerOp {
     )]
     pub hash: i32,
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub prefix: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", tag = "3")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub suffix: ::prost::alloc::vec::Vec<u8>,
 }
 /// *
@@ -227,7 +251,7 @@ pub struct InnerOp {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.ProofSpec")]
+#[proto_message(type_url = "/cosmos.ics23.v1.ProofSpec")]
 pub struct ProofSpec {
     /// any field in the ExistenceProof must be the same as in this spec.
     /// except Prefix, which is just the first bytes of prefix (spec can be longer)
@@ -249,6 +273,11 @@ pub struct ProofSpec {
         deserialize_with = "crate::serde::as_str::deserialize"
     )]
     pub min_depth: i32,
+    /// prehash_key_before_comparison is a flag that indicates whether to use the
+    /// prehash_key specified by LeafOp to compare lexical ordering of keys for
+    /// non-existence proofs.
+    #[prost(bool, tag = "5")]
+    pub prehash_key_before_comparison: bool,
 }
 ///
 /// InnerSpec contains all store-specific structure info to determine if two proofs from a
@@ -270,12 +299,16 @@ pub struct ProofSpec {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.InnerSpec")]
+#[proto_message(type_url = "/cosmos.ics23.v1.InnerSpec")]
 pub struct InnerSpec {
     /// Child order is the ordering of the children node, must count from 0
     /// iavl tree is [0, 1] (left then right)
     /// merk is [0, 2, 1] (left, right, here)
     #[prost(int32, repeated, tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_str_vec::serialize",
+        deserialize_with = "crate::serde::as_str_vec::deserialize"
+    )]
     pub child_order: ::prost::alloc::vec::Vec<i32>,
     #[prost(int32, tag = "2")]
     #[serde(
@@ -297,6 +330,10 @@ pub struct InnerSpec {
     pub max_prefix_length: i32,
     /// empty child is the prehash image that is used when one child is nil (eg. 20 bytes of 0)
     #[prost(bytes = "vec", tag = "5")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub empty_child: ::prost::alloc::vec::Vec<u8>,
     /// hash is the algorithm that must be used for each InnerOp
     #[prost(enumeration = "HashOp", tag = "6")]
@@ -319,7 +356,7 @@ pub struct InnerSpec {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.BatchProof")]
+#[proto_message(type_url = "/cosmos.ics23.v1.BatchProof")]
 pub struct BatchProof {
     #[prost(message, repeated, tag = "1")]
     pub entries: ::prost::alloc::vec::Vec<BatchEntry>,
@@ -336,7 +373,7 @@ pub struct BatchProof {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.BatchEntry")]
+#[proto_message(type_url = "/cosmos.ics23.v1.BatchEntry")]
 pub struct BatchEntry {
     #[prost(oneof = "batch_entry::Proof", tags = "1, 2")]
     pub proof: ::core::option::Option<batch_entry::Proof>,
@@ -372,7 +409,7 @@ pub mod batch_entry {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.CompressedBatchProof")]
+#[proto_message(type_url = "/cosmos.ics23.v1.CompressedBatchProof")]
 pub struct CompressedBatchProof {
     #[prost(message, repeated, tag = "1")]
     pub entries: ::prost::alloc::vec::Vec<CompressedBatchEntry>,
@@ -391,7 +428,7 @@ pub struct CompressedBatchProof {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.CompressedBatchEntry")]
+#[proto_message(type_url = "/cosmos.ics23.v1.CompressedBatchEntry")]
 pub struct CompressedBatchEntry {
     #[prost(oneof = "compressed_batch_entry::Proof", tags = "1, 2")]
     pub proof: ::core::option::Option<compressed_batch_entry::Proof>,
@@ -427,16 +464,28 @@ pub mod compressed_batch_entry {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.CompressedExistenceProof")]
+#[proto_message(type_url = "/cosmos.ics23.v1.CompressedExistenceProof")]
 pub struct CompressedExistenceProof {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub value: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "3")]
     pub leaf: ::core::option::Option<LeafOp>,
     /// these are indexes into the lookup_inners table in CompressedBatchProof
     #[prost(int32, repeated, tag = "4")]
+    #[serde(
+        serialize_with = "crate::serde::as_str_vec::serialize",
+        deserialize_with = "crate::serde::as_str_vec::deserialize"
+    )]
     pub path: ::prost::alloc::vec::Vec<i32>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -450,10 +499,14 @@ pub struct CompressedExistenceProof {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/ics23.CompressedNonExistenceProof")]
+#[proto_message(type_url = "/cosmos.ics23.v1.CompressedNonExistenceProof")]
 pub struct CompressedNonExistenceProof {
     /// TODO: remove this as unnecessary??? we prove a range
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "2")]
     pub left: ::core::option::Option<CompressedExistenceProof>,

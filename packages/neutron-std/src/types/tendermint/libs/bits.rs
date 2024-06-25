@@ -19,5 +19,9 @@ pub struct BitArray {
     )]
     pub bits: i64,
     #[prost(uint64, repeated, tag = "2")]
+    #[serde(
+        serialize_with = "crate::serde::as_str_vec::serialize",
+        deserialize_with = "crate::serde::as_str_vec::deserialize"
+    )]
     pub elems: ::prost::alloc::vec::Vec<u64>,
 }

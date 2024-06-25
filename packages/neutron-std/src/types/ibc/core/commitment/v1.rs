@@ -15,6 +15,10 @@ use osmosis_std_derive::CosmwasmExt;
 #[proto_message(type_url = "/ibc.core.commitment.v1.MerkleRoot")]
 pub struct MerkleRoot {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub hash: ::prost::alloc::vec::Vec<u8>,
 }
 /// MerklePrefix is merkle path prefixed to the key.
@@ -34,6 +38,10 @@ pub struct MerkleRoot {
 #[proto_message(type_url = "/ibc.core.commitment.v1.MerklePrefix")]
 pub struct MerklePrefix {
     #[prost(bytes = "vec", tag = "1")]
+    #[serde(
+        serialize_with = "crate::serde::as_base64_encoded_string::serialize",
+        deserialize_with = "crate::serde::as_base64_encoded_string::deserialize"
+    )]
     pub key_prefix: ::prost::alloc::vec::Vec<u8>,
 }
 /// MerklePath is the path used to verify commitment proofs, which can be an
@@ -74,5 +82,6 @@ pub struct MerklePath {
 #[proto_message(type_url = "/ibc.core.commitment.v1.MerkleProof")]
 pub struct MerkleProof {
     #[prost(message, repeated, tag = "1")]
-    pub proofs: ::prost::alloc::vec::Vec<super::super::super::super::ics23::CommitmentProof>,
+    pub proofs:
+        ::prost::alloc::vec::Vec<super::super::super::super::cosmos::ics23::v1::CommitmentProof>,
 }

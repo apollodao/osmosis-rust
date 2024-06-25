@@ -1,4 +1,4 @@
-use ::serde::{ser, Deserialize, Deserializer, Serialize, Serializer};
+use ::serde::{Deserialize, Deserializer, Serialize, Serializer};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use cosmwasm_std::StdResult;
 use serde::de;
@@ -6,8 +6,6 @@ use serde::de::Visitor;
 
 use std::fmt;
 use std::str::FromStr;
-
-use prost::Message;
 
 #[derive(Clone, PartialEq, Eq, ::prost::Message, schemars::JsonSchema)]
 pub struct Timestamp {
@@ -36,7 +34,7 @@ impl Serialize for Timestamp {
         ts.normalize();
         let dt = NaiveDateTime::from_timestamp_opt(ts.seconds, ts.nanos as u32)
             .expect("invalid or out-of-range datetime");
-        let dt: DateTime<Utc> = DateTime::from_utc(dt, Utc);
+        let dt: DateTime<Utc> = DateTime::from_naive_utc_and_offset(dt, Utc);
         serializer.serialize_str(format!("{:?}", dt).as_str())
     }
 }

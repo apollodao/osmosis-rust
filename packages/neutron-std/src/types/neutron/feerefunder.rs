@@ -82,6 +82,7 @@ pub struct Params {
 pub struct GenesisState {
     #[prost(message, optional, tag = "1")]
     pub params: ::core::option::Option<Params>,
+    /// this line is used by starport scaffolding # genesis/proto/state
     #[prost(message, repeated, tag = "2")]
     pub fee_infos: ::prost::alloc::vec::Vec<FeeInfo>,
 }
@@ -188,6 +189,48 @@ pub struct FeeInfoResponse {
     #[prost(message, optional, tag = "1")]
     pub fee_info: ::core::option::Option<FeeInfo>,
 }
+/// MsgUpdateParams is the MsgUpdateParams request type.
+///
+/// Since: 0.47
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.feerefunder.MsgUpdateParams")]
+pub struct MsgUpdateParams {
+    /// Authority is the address of the governance account.
+    #[prost(string, tag = "1")]
+    pub authority: ::prost::alloc::string::String,
+    /// params defines the x/feerefunder parameters to update.
+    ///
+    /// NOTE: All parameters must be supplied.
+    #[prost(message, optional, tag = "2")]
+    pub params: ::core::option::Option<Params>,
+}
+/// MsgUpdateParamsResponse defines the response structure for executing a
+/// MsgUpdateParams message.
+///
+/// Since: 0.47
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/neutron.feerefunder.MsgUpdateParamsResponse")]
+pub struct MsgUpdateParamsResponse {}
 pub struct FeerefunderQuerier<'a, Q: cosmwasm_std::CustomQuery> {
     querier: &'a cosmwasm_std::QuerierWrapper<'a, Q>,
 }

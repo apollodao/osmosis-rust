@@ -35,13 +35,14 @@ pub struct GenericAuthorization {
 pub struct Grant {
     #[prost(message, optional, tag = "1")]
     pub authorization: ::core::option::Option<crate::shim::Any>,
+    /// time when the grant will expire and will be pruned. If null, then the grant
+    /// doesn't have a time expiration (other conditions  in `authorization`
+    /// may apply to invalidate the grant)
     #[prost(message, optional, tag = "2")]
     pub expiration: ::core::option::Option<crate::shim::Timestamp>,
 }
 /// GrantAuthorization extends a grant with both the addresses of the grantee and granter.
 /// It is used in genesis.proto and query.proto
-///
-/// Since: cosmos-sdk 0.45.2
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(
     Clone,
@@ -63,6 +64,24 @@ pub struct GrantAuthorization {
     pub authorization: ::core::option::Option<crate::shim::Any>,
     #[prost(message, optional, tag = "4")]
     pub expiration: ::core::option::Option<crate::shim::Timestamp>,
+}
+/// GrantQueueItem contains the list of TypeURL of a sdk.Msg.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/cosmos.authz.v1beta1.GrantQueueItem")]
+pub struct GrantQueueItem {
+    /// msg_type_urls contains the list of TypeURL of a sdk.Msg.
+    #[prost(string, repeated, tag = "1")]
+    pub msg_type_urls: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 /// EventGrant is emitted on Msg/Grant
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -224,7 +243,7 @@ pub struct QueryGranterGrantsResponse {
     #[prost(message, optional, tag = "2")]
     pub pagination: ::core::option::Option<super::super::base::query::v1beta1::PageResponse>,
 }
-/// QueryGranteeGrantsRequest is the request type for the Query/IssuedGrants RPC method.
+/// QueryGranteeGrantsRequest is the request type for the Query/GranteeGrants RPC method.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(
     Clone,
@@ -291,7 +310,7 @@ pub struct MsgGrant {
     #[prost(message, optional, tag = "3")]
     pub grant: ::core::option::Option<Grant>,
 }
-/// MsgExecResponse defines the Msg/MsgExecResponse response type.
+/// MsgGrantResponse defines the Msg/MsgGrant response type.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(
     Clone,
@@ -303,11 +322,8 @@ pub struct MsgGrant {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/cosmos.authz.v1beta1.MsgExecResponse")]
-pub struct MsgExecResponse {
-    #[prost(bytes = "vec", repeated, tag = "1")]
-    pub results: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
-}
+#[proto_message(type_url = "/cosmos.authz.v1beta1.MsgGrantResponse")]
+pub struct MsgGrantResponse {}
 /// MsgExec attempts to execute the provided messages using
 /// authorizations granted to the grantee. Each message should have only
 /// one signer corresponding to the granter of the authorization.
@@ -326,13 +342,13 @@ pub struct MsgExecResponse {
 pub struct MsgExec {
     #[prost(string, tag = "1")]
     pub grantee: ::prost::alloc::string::String,
-    /// Authorization Msg requests to execute. Each msg must implement Authorization interface
+    /// Execute Msg.
     /// The x/authz will try to find a grant matching (msg.signers\[0\], grantee, MsgTypeURL(msg))
     /// triple and validate it.
     #[prost(message, repeated, tag = "2")]
     pub msgs: ::prost::alloc::vec::Vec<crate::shim::Any>,
 }
-/// MsgGrantResponse defines the Msg/MsgGrant response type.
+/// MsgExecResponse defines the Msg/MsgExecResponse response type.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(
     Clone,
@@ -344,8 +360,11 @@ pub struct MsgExec {
     ::schemars::JsonSchema,
     CosmwasmExt,
 )]
-#[proto_message(type_url = "/cosmos.authz.v1beta1.MsgGrantResponse")]
-pub struct MsgGrantResponse {}
+#[proto_message(type_url = "/cosmos.authz.v1beta1.MsgExecResponse")]
+pub struct MsgExecResponse {
+    #[prost(bytes = "vec", repeated, tag = "1")]
+    pub results: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+}
 /// MsgRevoke revokes any authorization with the provided sdk.Msg type on the
 /// granter's account with that has been granted to the grantee.
 #[allow(clippy::derive_partial_eq_without_eq)]
