@@ -19,6 +19,49 @@ pub struct DenomAuthorityMetadata {
     #[prost(string, tag = "1")]
     pub admin: ::prost::alloc::string::String,
 }
+/// GenesisState defines the tokenfactory module's genesis state.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/osmosis.tokenfactory.v1beta1.GenesisState")]
+pub struct GenesisState {
+    /// params defines the parameters of the module.
+    #[prost(message, optional, tag = "1")]
+    pub params: ::core::option::Option<super::Params>,
+    #[prost(message, repeated, tag = "2")]
+    pub factory_denoms: ::prost::alloc::vec::Vec<GenesisDenom>,
+}
+/// GenesisDenom defines a tokenfactory denom that is defined within genesis
+/// state. The structure contains DenomAuthorityMetadata which defines the
+/// denom's admin.
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(
+    Clone,
+    PartialEq,
+    Eq,
+    ::prost::Message,
+    ::serde::Serialize,
+    ::serde::Deserialize,
+    ::schemars::JsonSchema,
+    CosmwasmExt,
+)]
+#[proto_message(type_url = "/osmosis.tokenfactory.v1beta1.GenesisDenom")]
+pub struct GenesisDenom {
+    #[prost(string, tag = "1")]
+    pub denom: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub authority_metadata: ::core::option::Option<DenomAuthorityMetadata>,
+    #[prost(string, tag = "3")]
+    pub hook_contract_address: ::prost::alloc::string::String,
+}
 /// Params defines the parameters for the tokenfactory module.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(
@@ -54,47 +97,6 @@ pub struct Params {
     #[prost(string, tag = "3")]
     pub fee_collector_address: ::prost::alloc::string::String,
 }
-/// GenesisState defines the tokenfactory module's genesis state.
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    ::prost::Message,
-    ::serde::Serialize,
-    ::serde::Deserialize,
-    ::schemars::JsonSchema,
-    CosmwasmExt,
-)]
-#[proto_message(type_url = "/osmosis.tokenfactory.v1beta1.GenesisState")]
-pub struct GenesisState {
-    /// params defines the parameters of the module.
-    #[prost(message, optional, tag = "1")]
-    pub params: ::core::option::Option<Params>,
-    #[prost(message, repeated, tag = "2")]
-    pub factory_denoms: ::prost::alloc::vec::Vec<GenesisDenom>,
-}
-/// GenesisDenom defines a tokenfactory denom that is defined within genesis
-/// state. The structure contains DenomAuthorityMetadata which defines the
-/// denom's admin.
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(
-    Clone,
-    PartialEq,
-    Eq,
-    ::prost::Message,
-    ::serde::Serialize,
-    ::serde::Deserialize,
-    ::schemars::JsonSchema,
-    CosmwasmExt,
-)]
-#[proto_message(type_url = "/osmosis.tokenfactory.v1beta1.GenesisDenom")]
-pub struct GenesisDenom {
-    #[prost(string, tag = "1")]
-    pub denom: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "2")]
-    pub authority_metadata: ::core::option::Option<DenomAuthorityMetadata>,
-}
 /// QueryParamsRequest is the request type for the Query/Params RPC method.
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(
@@ -129,7 +131,7 @@ pub struct QueryParamsRequest {}
 pub struct QueryParamsResponse {
     /// params defines the parameters of the module.
     #[prost(message, optional, tag = "1")]
-    pub params: ::core::option::Option<Params>,
+    pub params: ::core::option::Option<super::Params>,
 }
 /// QueryDenomAuthorityMetadataRequest defines the request structure for the
 /// DenomAuthorityMetadata gRPC query.
@@ -536,7 +538,7 @@ pub struct MsgUpdateParams {
     ///
     /// NOTE: All parameters must be supplied.
     #[prost(message, optional, tag = "2")]
-    pub params: ::core::option::Option<Params>,
+    pub params: ::core::option::Option<super::Params>,
 }
 /// MsgUpdateParamsResponse defines the response structure for executing a
 /// MsgUpdateParams message.

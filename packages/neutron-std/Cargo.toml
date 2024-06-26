@@ -3,7 +3,7 @@ description = "Standard library for Neutron with CosmWasm support included"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 name = "neutron-std"
-version = "4.0.0-rc.3"
+version = "4.0.1-rc.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

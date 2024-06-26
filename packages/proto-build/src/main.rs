@@ -16,7 +16,7 @@ const COSMOS_SDK_REV: &str = "v0.50.7";
 /// The osmosis commit or tag to be cloned and used to build the proto files
 const OSMOSIS_REV: &str = "v25.0.0";
 
-const NEUTRON_REV: &str = "v4.0.0-rc3";
+const NEUTRON_REV: &str = "v4.0.1";
 
 /// The wasmd commit or tag to be cloned and used to build the proto files
 const WASMD_REV: &str = "v0.51.0";
